@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+                <title>Update on Coupled Deterministic Modeling</title>
+
+                <meta name="description" content="This talk will discuss 
+                progress on coupled physics analysis of reactor transients in 
+                Fluoride Salt Cooled High Temperature Reactors (FHRs), with 
+                particular focus on the Pebble-Bed, Fluoride Salt Cooled, High 
+                Temperature Reactor (PB-FHR).  The development and 
+                implementation of an incompressible but thermally expandable 
+                model of salt flow through the pebble bed will be discussed as 
+                well, in the context of implementation within the MOOSE 
+                framework.">
+		<meta name="author" content="Dr. Kathryn Huff">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/simple.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+                                <section>
+                                        <h3>Update on Coupled Deterministic Modeling</h3>
+                                        <br/>
+                                        <h3>Kathryn Huff</h3>
+                                        <h3>FHR Workshop</h3>
+                                        <h3>April 15, 2016</h3>
+                                </section>
+                                <section>
+                                        <section>
+                                         <h2>FHR Coupled, Transient Analysis</h2>
+                                        <ul>
+                                         <li>Collect experimental data</li>
+                                         <li>Conduct algebraic, static, and benchmark simulations</li>
+                                         <li>Develop few group parameters, steady state results</li>
+                                         <li>Develop 0D coupled neutronics/TH model (PyRK)</li>
+                                         <li class="fragment highlight-blue">Develop 3D neutronics/TH model</li>
+                                         <li>Compare 0D and 3D simulations</li>
+                                         <li>Couple additional physics (e.g.  fuel performance)</li>
+                                        </ul>
+                                        </section>
+                                        <section>
+                                                <h2>MOOSE-Based Application Development</h2>
+                                                <span class="fragment">
+                                                <a href="http://mooseframework.org/static/media/wiki/images/229/9629aa4947c9233de95d8a214180bdeb/moose.png"
+                                                  class="image"><img
+                                                  src="http://mooseframework.org/static/media/wiki/images/229/9629aa4947c9233de95d8a214180bdeb/moose.png"
+                                                  height="600"
+                                                  alt="moose"></a>
+                                                </span>
+					</section>
+                                        <section>
+                                                <h2>MOOSE Framework</h2>
+                                                <ul>
+                                                        <li>Finite Element 
+                                                                Framework</li>
+                                                        <li>Jacobian-Free 
+                                                                Newton Krylov</li>
+                                                        <li>Adaptively meshed 
+                                                                geometry 
+                                                                handling</li>
+                                                        <li>Scalability</li>
+                                                </ul>
+                                        </section>
+                                        <section>
+                                                <h2>PRONGHORN Capabilities</h2>
+                                                <ul>
+                                                        <li>Diffusion 
+                                                                Neutronics</li>
+                                                        <li>Conjugate Heat 
+                                                                Transfer</li>
+                                                        <li>Pebble Bed Darcy 
+                                                                Flow (gaseous)</li>
+                                                </ul>
+                                        </section>
+                                        <section>
+                                                <h2>PRONGHORN PBMR-400 Benchmark</h2>
+                                                <a href="https://raw.githubusercontent.com/katyhuff/2016-04-15-fhr/gh-pages/images/pronghorn-bench.png"
+                                                  class="image"><img
+                                                  src="https://raw.githubusercontent.com/katyhuff/2016-04-15-fhr/gh-pages/images/pronghorn-bench.png"
+                                                  alt="pbmr benchmark"></a>
+                                        </section>
+                                        <section>
+                                                <h2>Single-Phase, Incompressible, Thermally-Expandable Flow</h2>
+                                                <small>
+                                                <h3>Continuity</h3>
+\[
+\begin{align}
+\frac{\partial \epsilon \rho_f}{\partial t}  + \nabla(\epsilon \rho_f \vec{u}) &= 0\\
+\end{align}
+\]
+<br/>
+                                                <h3>Momentum</h3>
+\[
+\begin{align}
+\frac{\partial \epsilon \rho_f}{\partial t}  + \nabla(\epsilon \rho_f 
+\vec{u}\times\vec{u}) + \nabla \epsilon P - \epsilon \rho_f \vec{g} + W\rho_f\vec{u} =0\\
+\end{align}
+\]
+<br/>
+<h3>Energy</h3>
+\[
+\begin{align}
+\frac{\partial\epsilon\rho_fH}{\partial t}  + \nabla(\epsilon\rho_f\vec{u}H) &= q'''
+\end{align}
+\]
+                                                </small>
+</section>
+<section>
+This form of the energy equation can be simplified with the introduction of the specific
+heat capacity, $C_p = \frac{\partial H}{\partial T}$. This nonconservative
+assumption results in a form of the energy equation appropriate for
+incompressible or nearly incompressible flows.
+\[
+\begin{align}
+\rho C_p\frac{\partial T}{\partial t} + \rho C_p \vec{u} \nabla T &= q'''
+\end{align}
+\]
+</section>
+<section>
+These equations are closed by the equation of state. This can be either of the
+form $P=P(\rho, \rho\vec{u}, \rho\vec{E})$ or $\rho=\rho(P, T)$. To ensure
+incompressible, thermally expandable flow, as in Hu, we use a relation between density
+and temperature of the form:
+\[
+\begin{align}
+\frac{\partial \rho}{\partial t} &= \xi \frac{\partial T}{\partial t}\\
+\nabla \rho &= \xi \nabla T
+\end{align}
+\]
+                                        </section>
+                                        <section>
+                                                <h2>Single-Phase, Incompressible, Thermally-Expandable Flow</h2>
+                                                <br/>
+                                                <p>Stabilization 
+                                                (SUPG/PSPG)</p>
+                                                <br/>
+\[
+\left\langle f_{continuity},\psi\right\rangle+\left\langle f_{mom,non},\tau_{pspg}\times\nabla\psi\right\rangle\\
+\left\langle f_{mom},\psi\right\rangle+\left\langle f_{mom,non},\tau_{supg}\times\nabla\psi\right\rangle\\
+\left\langle f_{energy},\psi\right\rangle+\left\langle f_{energy,non},\tau_{supg}\times\nabla\psi\right\rangle
+\]
+                                        </section>
+                                        <section>
+                                                <h2>Single-Phase, Incompressible, Thermally-Expandable Flow</h2>
+						Implementation testing underway.
+                                        </section>
+				</section>
+				<section>
+                                        <section>
+                                                <h2>Future work</h2>
+						<ul>
+						<li>3D Steady State Neutronics, Fixed Cross Sections</li>
+						<li>3D Steady State Thermal Hydraulics, Fixed Power, Compare to COMSOL</li>
+						<li>Coupled 3D Steady State N&TH</li>
+						<li>Transients - LOFC, LOHS, LOLA, RIA</li>
+						<li>Startup Modeling</li>
+						<li>Randomly Packed Bed Hot Spot Analyses</li>
+						<li>Xenon Stability</li>
+						</ul>
+                                        </section>
+                                        <section>
+                                        <h2>Links</h2>
+                                        <ul>
+                                        <ul>
+                                        <li><a href="katyhuff.github.io"> katyhuff.github.io </a></li>
+                                        <li><a href="fuelcycle.org"> fuelcycle.org</a></li>
+                                        <li><a href="fhr.nuc.berkeley.edu">fhr.nuc.berkeley.edu</a></li>
+                                        <li><a href="http://pyrk.github.io/">pyrk.github.io</a></li>
+                                        </ul>
+                                        </section>
+					<section>
+                                        <h2>Acknowledgements</h2>
+                                                <p>
+                                                <ul>
+                                                <li>Massimiliano Fratoni</li>
+                                                <li>Per Peterson</li>
+                                                <li>Manuele Aufiero</li>
+                                                <li>Xin Wang</li>
+                                                <li>Lance Maul</li>
+                                                <li>Dan Chen</li>
+                                                <li>April Novak</li>
+                                                <li>Jasmina Vujic</li>
+                                                <li>and many more...</li>
+                                                </ul>
+                                                <br/>
+                                                <span class="fragment">
+                                                <a href="http://bids.berkeley.edu"
+                                                  class="image"><img
+                                                  width="25%"
+                                                  src="http://bids.berkeley.edu/sites/all/themes/bids/logo.png"
+                                                  alt="BIDS Logo"></a>
+                                                </span>
+                                                <span class="fragment">
+                                                <a href="http://nssc.berkeley.edu"
+                                                  class="image"><img
+                                                  width="25%"
+                                                  src="http://www.nuc.berkeley.edu/~bethany/wp-content/uploads/NSSC_newLogo_small-300x190.png"
+                                                  alt=""></a>
+                                                </span>
+                                                <span class="fragment">
+                                                <a href="http://fhr.nuc.berkeley.edu"
+                                                  class="image"><img
+                                                  width="25%"
+                                                  src="http://fhr.nuc.berkeley.edu/wp-content/uploads/2014/10/FHR-logo-300x175.jpg"
+                                                  alt="FHR Logo"></a>
+                                                </span>
+                                        </section>
+                                </section>
+				<section>
+					<h1>THE END</h1>
+                                        <h3><a
+                                            href="https://katyhuff.github.io">Katy Huff</a> </h3>
+                                        <a href="https://katyhuff.github.io/2016-04-15-fhr">katyhuff.github.io/2016-04-15-fhr</a>
+
+<br/>
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img
+  alt="Creative Commons License" style="border-width:0"
+  src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br /><span
+  xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Update on Coupled Deterministic Modeling</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://katyhuff.github.io" property="cc:attributionName" rel="cc:attributionURL">Kathryn Huff</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="http://katyhuff.github.io/2016-04-15-fhr" rel="dct:source">http://katyhuff.github.io/2016-04-15-fhr</a>.
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+                                slideNumber: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+                                        { src: 'plugin/math/math.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
